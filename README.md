@@ -1,2 +1,2 @@
 # ge-public-skills
-Global Engineering Common Skills Repository
+Global Engineering PUBLIC Common Skills Repository
