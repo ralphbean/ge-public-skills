@@ -2,13 +2,14 @@
 
 These settings must be configured for the sync automation to work correctly.
 
-## 1. Allow GitHub Actions to create PRs
+## 1. Allow GitHub Actions to create issues
 
 **Settings > Actions > General > Workflow permissions**
 
-- Enable "Allow GitHub Actions to create and approve pull requests"
+- Enable "Read and write permissions"
 
-Without this, the sync workflow cannot open PRs for new/updated skills.
+The sync workflow pushes directly to main and opens GitHub issues for
+skills that fail lint. It needs write access to contents and issues.
 
 ## 2. Branch ruleset on `main`
 
@@ -17,21 +18,16 @@ Without this, the sync workflow cannot open PRs for new/updated skills.
 ### Required status checks
 
 - Add `lint` as a required status check
+- Add the GitHub Actions integration as a bypass actor
 
-This ensures synced skills pass linting before merging.
+The lint check gates human PRs. The sync workflow bypasses it because
+it runs lint internally before committing (using the same `lint_skill()`
+function from `scripts/lint.py`).
 
-### Merge queue
+### Bypass actors
 
-- Enable merge queue with squash merge method
+- Repository admin role (for manual pushes during setup)
+- GitHub Actions integration (for automated sync pushes)
 
-The sync automation files one PR per skill. A merge queue ensures they
-merge sequentially without conflicts (each skill PR rebases on the
-latest `main` before merging). Without this, the second PR in a batch
-may fail to auto-merge because the first PR changed `main` under it.
-
-## 3. Auto-merge
-
-The sync script calls `gh pr merge --auto --squash` on each PR. This
-requires the merge queue (or at minimum required status checks) to be
-configured — otherwise auto-merge has no requirements to wait for and
-the behavior is unpredictable.
+On personal repos, GitHub Actions cannot be added as a bypass actor via
+the API. This works on organization repos.
