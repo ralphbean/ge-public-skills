@@ -13,7 +13,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  issues: write
 
 jobs:
   sync:
@@ -29,6 +29,6 @@ jobs:
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      - run: python scripts/open_sync_prs.py
+      - run: python scripts/sync.py
         env:
           GH_TOKEN: ${{ github.token }}

@@ -39,6 +39,41 @@ def _parse_frontmatter(skill_md_path):
     return data, None
 
 
+def lint_skill(repo_root, skill_name):
+    """Lint a single skill directory.
+
+    Returns a list of error strings. Empty list means the skill passed.
+    """
+    errors = []
+    skill_path = os.path.join(repo_root, "skills", skill_name)
+    if not os.path.isdir(skill_path):
+        return [f"skills/{skill_name}: directory does not exist"]
+
+    skill_md = os.path.join(skill_path, "SKILL.md")
+    if not os.path.isfile(skill_md):
+        return [f"skills/{skill_name}: missing SKILL.md"]
+
+    data, err = _parse_frontmatter(skill_md)
+    if err:
+        return [err]
+
+    name = data.get("name")
+    if not name or (isinstance(name, str) and not name.strip()):
+        errors.append(f"skills/{skill_name}/SKILL.md: frontmatter 'name' is empty or missing")
+
+    desc = data.get("description")
+    if not desc or (isinstance(desc, str) and not desc.strip()):
+        errors.append(f"skills/{skill_name}/SKILL.md: frontmatter 'description' is empty or missing")
+
+    if name and isinstance(name, str) and name.strip() != skill_name:
+        errors.append(
+            f"skills/{skill_name}/SKILL.md: frontmatter name '{name.strip()}' "
+            f"does not match directory name '{skill_name}'"
+        )
+
+    return errors
+
+
 def lint_skills_dir(repo_root):
     """Lint all skill directories under repo_root/skills/.
 
@@ -50,33 +85,9 @@ def lint_skills_dir(repo_root):
         return errors
 
     for entry in sorted(os.listdir(skills_dir)):
-        skill_path = os.path.join(skills_dir, entry)
-        if not os.path.isdir(skill_path):
+        if not os.path.isdir(os.path.join(skills_dir, entry)):
             continue
-
-        skill_md = os.path.join(skill_path, "SKILL.md")
-        if not os.path.isfile(skill_md):
-            errors.append(f"skills/{entry}: missing SKILL.md")
-            continue
-
-        data, err = _parse_frontmatter(skill_md)
-        if err:
-            errors.append(err)
-            continue
-
-        name = data.get("name")
-        if not name or (isinstance(name, str) and not name.strip()):
-            errors.append(f"skills/{entry}/SKILL.md: frontmatter 'name' is empty or missing")
-
-        desc = data.get("description")
-        if not desc or (isinstance(desc, str) and not desc.strip()):
-            errors.append(f"skills/{entry}/SKILL.md: frontmatter 'description' is empty or missing")
-
-        if name and isinstance(name, str) and name.strip() != entry:
-            errors.append(
-                f"skills/{entry}/SKILL.md: frontmatter name '{name.strip()}' "
-                f"does not match directory name '{entry}'"
-            )
+        errors.extend(lint_skill(repo_root, entry))
 
     return errors
 
