@@ -1,5 +1,3 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-Read AGENTS.md for full repository context and conventions.
+You must read AGENTS.md for repository context and conventions.
