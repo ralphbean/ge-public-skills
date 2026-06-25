@@ -8,4 +8,12 @@
 #       skills:
 #         - path: path/to/skill-directory
 #
-sources: []
+sources:
+  - repo: https://github.com/RedHatProductSecurity/prodsec-skills
+    ref: main
+    skills:
+      - path: module/skills/secure-by-design
+  - repo: https://github.com/konflux-ci/skills
+    ref: main
+    skills:
+      - path: skills/understanding-konflux-resources
