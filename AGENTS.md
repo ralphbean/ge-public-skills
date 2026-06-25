@@ -20,10 +20,25 @@ The `name` field in SKILL.md frontmatter must match the directory name (kebab-ca
 
 ## How skills get here
 
-1. A human adds an entry to `sync-manifest.yaml` pointing at an upstream repo + skill path
-2. CI clones the upstream, copies the skill directory into `skills/`, and opens a PR
-3. Linting runs on the PR; if it passes, the PR auto-merges
-4. Post-merge, `.claude-plugin/marketplace.json` is regenerated
+1. A contributor opens a PR that adds an entry to `sync-manifest.yaml`
+2. The Lint CI workflow fetches the new skill from the upstream repo and lints it (without committing it to the PR)
+3. If lint passes, a maintainer merges the PR
+4. The Sync workflow runs post-merge, clones the upstream, and commits the skill content to `skills/`
+5. Post-merge, `.claude-plugin/marketplace.json` is regenerated
+
+### Adding a new skill
+
+Open a PR that adds an entry to `sync-manifest.yaml`:
+
+```yaml
+sources:
+  - repo: https://github.com/org/repo
+    ref: main
+    skills:
+      - path: path/to/skill-directory
+```
+
+CI will automatically fetch the skill from the upstream repo and lint it. You don't need to include the skill content in your PR — only the manifest entry. If the upstream skill fails lint, CI will tell you what to fix upstream before the skill can be included.
 
 ## What you should know when working here
 

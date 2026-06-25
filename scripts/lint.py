@@ -17,6 +17,8 @@ import sys
 
 import yaml
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def _parse_frontmatter(skill_md_path):
     """Extract YAML frontmatter from a SKILL.md file.
@@ -162,10 +164,15 @@ def lint_manifest(manifest_path):
 
 
 def main():
-    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    repo_root = REPO_ROOT
+    manifest_path = os.path.join(repo_root, "sync-manifest.yaml")
+
+    if "--fetch-new" in sys.argv:
+        from scripts.sync import fetch_new_skills
+        fetch_new_skills(repo_root, manifest_path)
+
     errors = []
     errors.extend(lint_skills_dir(repo_root))
-    manifest_path = os.path.join(repo_root, "sync-manifest.yaml")
     if os.path.isfile(manifest_path):
         errors.extend(lint_manifest(manifest_path))
     for err in errors:

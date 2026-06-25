@@ -5,6 +5,7 @@ from scripts.sync import (
     mirror_directory,
     detect_changes,
     find_orphaned_skills,
+    find_new_manifest_skills,
 )
 
 
@@ -167,3 +168,66 @@ class TestFindOrphanedSkills:
         (skills_dir / "README.md").write_text("# Skills")
         result = find_orphaned_skills(str(tmp_path), [])
         assert result == []
+
+
+class TestFindNewManifestSkills:
+    def test_no_new_skills(self, tmp_path):
+        """All manifest skills already exist on disk."""
+        skills_dir = tmp_path / "skills"
+        (skills_dir / "skill-a").mkdir(parents=True)
+        (skills_dir / "skill-a" / "SKILL.md").write_text("# A")
+        sources = [
+            {"repo": "https://github.com/org/repo", "ref": "main",
+             "skills": [{"path": "skills/skill-a"}]},
+        ]
+        result = find_new_manifest_skills(str(tmp_path), sources)
+        assert result == []
+
+    def test_new_skill_detected(self, tmp_path):
+        """A manifest entry with no local directory is new."""
+        skills_dir = tmp_path / "skills"
+        (skills_dir / "skill-a").mkdir(parents=True)
+        (skills_dir / "skill-a" / "SKILL.md").write_text("# A")
+        sources = [
+            {"repo": "https://github.com/org/repo", "ref": "main",
+             "skills": [
+                 {"path": "skills/skill-a"},
+                 {"path": "skills/skill-b"},
+             ]},
+        ]
+        result = find_new_manifest_skills(str(tmp_path), sources)
+        assert len(result) == 1
+        assert result[0]["name"] == "skill-b"
+        assert result[0]["repo"] == "https://github.com/org/repo"
+        assert result[0]["ref"] == "main"
+        assert result[0]["path"] == "skills/skill-b"
+
+    def test_all_new_when_no_skills_dir(self, tmp_path):
+        """When skills/ doesn't exist, all manifest entries are new."""
+        sources = [
+            {"repo": "https://github.com/org/repo", "ref": "main",
+             "skills": [{"path": "skills/skill-a"}]},
+        ]
+        result = find_new_manifest_skills(str(tmp_path), sources)
+        assert len(result) == 1
+        assert result[0]["name"] == "skill-a"
+
+    def test_empty_manifest(self, tmp_path):
+        """Empty manifest means no new skills."""
+        result = find_new_manifest_skills(str(tmp_path), [])
+        assert result == []
+
+    def test_multiple_sources(self, tmp_path):
+        """New skills detected across multiple sources."""
+        (tmp_path / "skills").mkdir()
+        sources = [
+            {"repo": "https://github.com/org/repo-a", "ref": "main",
+             "skills": [{"path": "skills/skill-a"}]},
+            {"repo": "https://github.com/org/repo-b", "ref": "dev",
+             "skills": [{"path": "skills/skill-b"}]},
+        ]
+        result = find_new_manifest_skills(str(tmp_path), sources)
+        assert len(result) == 2
+        assert result[0]["repo"] == "https://github.com/org/repo-a"
+        assert result[1]["repo"] == "https://github.com/org/repo-b"
+        assert result[1]["ref"] == "dev"

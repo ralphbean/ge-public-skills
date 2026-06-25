@@ -26,20 +26,13 @@ lola install https://github.com/RedHatProductSecurity/ge-public-skills.git
 ## How it works
 
 1. [`sync-manifest.yaml`](sync-manifest.yaml) declares which skills to pull from which upstream repos
-2. A daily GitHub Actions workflow clones each upstream, compares content, and opens a PR per changed skill
-3. PRs are linted automatically — if checks pass, they auto-merge
+2. A daily GitHub Actions workflow clones each upstream, compares content, and pushes updated skills directly to main
+3. Skills removed from the manifest are automatically deleted
 4. Post-merge, [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) is regenerated
 
-## Upstream sources
+## Adding a skill
 
-| Repository | Description |
-|-----------|-------------|
-| [prodsec-skills](https://github.com/RedHatProductSecurity/prodsec-skills) | Security guidance skills for AI coding assistants |
-| [konflux-ci/skills](https://github.com/konflux-ci/skills) | Skills for the Konflux CI/CD platform |
-
-## Requesting a skill
-
-To add a skill from an upstream source, open a PR that adds an entry to [`sync-manifest.yaml`](sync-manifest.yaml):
+Open a PR that adds an entry to [`sync-manifest.yaml`](sync-manifest.yaml):
 
 ```yaml
 sources:
@@ -49,7 +42,9 @@ sources:
       - path: path/to/skill-directory
 ```
 
-The sync automation will pick it up on its next run.
+You only need to edit the manifest — don't include the skill content in your PR. CI will automatically fetch the skill from the upstream repo and lint it. If the upstream skill fails lint, CI will tell you what needs to be fixed upstream before it can be included.
+
+Once merged, the sync workflow will clone the upstream and commit the skill content.
 
 ## Layout
 

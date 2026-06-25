@@ -1,8 +1,9 @@
 """tests/test_lint.py"""
 import os
 import tempfile
+from unittest.mock import patch
 import pytest
-from scripts.lint import lint_skills_dir, lint_manifest
+from scripts.lint import lint_skills_dir, lint_manifest, main
 
 
 def _write_skill(base, name, frontmatter="---\nname: {name}\ndescription: A skill\n---\n# Content\n"):
@@ -161,3 +162,29 @@ class TestManifestValidation:
         manifest.write_text(": invalid: yaml: [")
         errors = lint_manifest(str(manifest))
         assert any("yaml" in e.lower() or "parse" in e.lower() for e in errors)
+
+
+class TestFetchNewFlag:
+    def test_fetch_new_calls_fetch_new_skills(self, tmp_path):
+        """--fetch-new causes lint to fetch new manifest skills before linting."""
+        manifest = tmp_path / "sync-manifest.yaml"
+        manifest.write_text("sources: []\n")
+        (tmp_path / "skills").mkdir()
+
+        with patch("scripts.sync.fetch_new_skills", return_value=[]) as mock_fetch:
+            with patch("sys.argv", ["lint.py", "--fetch-new"]):
+                with patch("scripts.lint.REPO_ROOT", str(tmp_path)):
+                    main()
+            mock_fetch.assert_called_once()
+
+    def test_no_fetch_without_flag(self, tmp_path):
+        """Without --fetch-new, fetch_new_skills is not called."""
+        manifest = tmp_path / "sync-manifest.yaml"
+        manifest.write_text("sources: []\n")
+        (tmp_path / "skills").mkdir()
+
+        with patch("scripts.sync.fetch_new_skills", return_value=[]) as mock_fetch:
+            with patch("sys.argv", ["lint.py"]):
+                with patch("scripts.lint.REPO_ROOT", str(tmp_path)):
+                    main()
+            mock_fetch.assert_not_called()

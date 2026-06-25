@@ -157,6 +157,32 @@ def find_orphaned_skills(repo_root, sources):
     return [name for name in local_names if name not in manifest_names]
 
 
+def find_new_manifest_skills(repo_root, sources):
+    """Return list of manifest skill entries not yet present on disk.
+
+    Each entry is a dict with keys: name, repo, ref, path.
+    """
+    skills_dir = os.path.join(repo_root, "skills")
+    new_skills = []
+
+    for source in sources:
+        repo_url = source.get("repo", "")
+        ref = source.get("ref", "")
+        for skill_entry in source.get("skills", []):
+            skill_path = skill_entry["path"]
+            skill_name = extract_skill_name(skill_path)
+            local_dir = os.path.join(skills_dir, skill_name)
+            if not os.path.isdir(local_dir):
+                new_skills.append({
+                    "name": skill_name,
+                    "repo": repo_url,
+                    "ref": ref,
+                    "path": skill_path,
+                })
+
+    return new_skills
+
+
 def sync_skills(repo_root, manifest_path):
     """Sync all skills declared in the manifest.
 
@@ -214,6 +240,56 @@ def sync_skills(repo_root, manifest_path):
                 })
 
     return changed
+
+
+def fetch_new_skills(repo_root, manifest_path):
+    """Fetch skills in the manifest that don't exist locally.
+
+    Clones upstreams and copies skill directories into skills/ without
+    committing. Used by lint to validate new manifest entries in PRs.
+
+    Returns list of fetched skill names.
+    """
+    sources = parse_manifest(manifest_path)
+    new_skills = find_new_manifest_skills(repo_root, sources)
+    if not new_skills:
+        return []
+
+    # Group by (repo, ref) to avoid cloning the same repo multiple times
+    by_repo = {}
+    for skill in new_skills:
+        key = (skill["repo"], skill["ref"])
+        by_repo.setdefault(key, []).append(skill)
+
+    fetched = []
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        for (repo_url, ref), skills in by_repo.items():
+            repo_short = _repo_short_name(repo_url)
+            clone_dir = os.path.join(tmp_dir, repo_short)
+
+            print(f"Fetching new skills from {repo_url} (ref: {ref})...")
+            _run([
+                "git", "clone", "--depth", "1",
+                "--branch", ref, repo_url, clone_dir,
+            ])
+
+            for skill in skills:
+                upstream_skill_dir = os.path.join(clone_dir, skill["path"])
+                if not os.path.isdir(upstream_skill_dir):
+                    print(
+                        f"  WARNING: {skill['path']} not found in "
+                        f"{repo_short}, skipping"
+                    )
+                    continue
+
+                local_skill_dir = os.path.join(
+                    repo_root, "skills", skill["name"],
+                )
+                print(f"  {skill['name']}: fetched for lint")
+                mirror_directory(upstream_skill_dir, local_skill_dir)
+                fetched.append(skill["name"])
+
+    return fetched
 
 
 def remove_orphaned_skills(repo_root, sources):
