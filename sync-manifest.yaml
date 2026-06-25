@@ -8,8 +8,4 @@
 #       skills:
 #         - path: path/to/skill-directory
 #
-sources:
-  - repo: https://github.com/konflux-ci/skills
-    ref: main
-    skills:
-      - path: skills/understanding-konflux-resources
+sources: []
