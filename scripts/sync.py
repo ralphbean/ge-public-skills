@@ -138,6 +138,25 @@ def _open_or_update_issue(skill_name, repo_url, upstream_sha, lint_errors):
         print(f"  {skill_name}: opened new issue")
 
 
+def find_orphaned_skills(repo_root, sources):
+    """Return sorted list of skill names present locally but not in manifest."""
+    skills_dir = os.path.join(repo_root, "skills")
+    if not os.path.isdir(skills_dir):
+        return []
+
+    manifest_names = set()
+    for source in sources:
+        for skill_entry in source.get("skills", []):
+            manifest_names.add(extract_skill_name(skill_entry["path"]))
+
+    local_names = [
+        entry for entry in sorted(os.listdir(skills_dir))
+        if os.path.isdir(os.path.join(skills_dir, entry))
+    ]
+
+    return [name for name in local_names if name not in manifest_names]
+
+
 def sync_skills(repo_root, manifest_path):
     """Sync all skills declared in the manifest.
 
@@ -197,9 +216,39 @@ def sync_skills(repo_root, manifest_path):
     return changed
 
 
+def remove_orphaned_skills(repo_root, sources):
+    """Remove skills not in the manifest, one commit per skill.
+
+    Returns list of removed skill names.
+    """
+    orphans = find_orphaned_skills(repo_root, sources)
+    removed = []
+
+    for skill_name in orphans:
+        skill_dir = os.path.join(repo_root, "skills", skill_name)
+        print(f"  {skill_name}: not in manifest, removing...")
+        shutil.rmtree(skill_dir)
+        _run(["git", "add", f"skills/{skill_name}"], cwd=repo_root)
+        commit_msg = f"sync: remove {skill_name} (no longer in manifest)"
+        _run(["git", "commit", "-m", commit_msg], cwd=repo_root)
+        removed.append(skill_name)
+
+    return removed
+
+
 def main():
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     manifest_path = os.path.join(repo_root, "sync-manifest.yaml")
+    sources = parse_manifest(manifest_path)
+
+    # Remove skills no longer in the manifest
+    removed = remove_orphaned_skills(repo_root, sources)
+    if removed:
+        _run(["git", "push", "origin", "main"], cwd=repo_root)
+        print(f"\nRemoved {len(removed)} orphaned skill(s):")
+        for name in removed:
+            print(f"  - {name}")
+
     changed = sync_skills(repo_root, manifest_path)
 
     if not changed:

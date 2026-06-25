@@ -4,6 +4,7 @@ from scripts.sync import (
     extract_skill_name,
     mirror_directory,
     detect_changes,
+    find_orphaned_skills,
 )
 
 
@@ -115,3 +116,54 @@ class TestDetectChanges:
         (dst / "SKILL.md").write_text("# Skill")
         (dst / "old.md").write_text("stale")
         assert detect_changes(str(src), str(dst)) is True
+
+
+class TestFindOrphanedSkills:
+    def test_no_orphans(self, tmp_path):
+        """All local skills have manifest entries."""
+        skills_dir = tmp_path / "skills"
+        (skills_dir / "skill-a").mkdir(parents=True)
+        (skills_dir / "skill-a" / "SKILL.md").write_text("# A")
+        sources = [
+            {"repo": "https://github.com/org/repo", "ref": "main",
+             "skills": [{"path": "skills/skill-a"}]},
+        ]
+        result = find_orphaned_skills(str(tmp_path), sources)
+        assert result == []
+
+    def test_orphan_detected(self, tmp_path):
+        """A local skill with no manifest entry is orphaned."""
+        skills_dir = tmp_path / "skills"
+        (skills_dir / "skill-a").mkdir(parents=True)
+        (skills_dir / "skill-a" / "SKILL.md").write_text("# A")
+        (skills_dir / "skill-b").mkdir(parents=True)
+        (skills_dir / "skill-b" / "SKILL.md").write_text("# B")
+        sources = [
+            {"repo": "https://github.com/org/repo", "ref": "main",
+             "skills": [{"path": "skills/skill-a"}]},
+        ]
+        result = find_orphaned_skills(str(tmp_path), sources)
+        assert result == ["skill-b"]
+
+    def test_empty_manifest(self, tmp_path):
+        """All skills are orphaned when manifest is empty."""
+        skills_dir = tmp_path / "skills"
+        (skills_dir / "skill-a").mkdir(parents=True)
+        (skills_dir / "skill-a" / "SKILL.md").write_text("# A")
+        (skills_dir / "skill-b").mkdir(parents=True)
+        (skills_dir / "skill-b" / "SKILL.md").write_text("# B")
+        result = find_orphaned_skills(str(tmp_path), [])
+        assert result == ["skill-a", "skill-b"]
+
+    def test_no_skills_dir(self, tmp_path):
+        """No skills directory means no orphans."""
+        result = find_orphaned_skills(str(tmp_path), [])
+        assert result == []
+
+    def test_ignores_non_directories(self, tmp_path):
+        """Files in skills/ are not treated as skill directories."""
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        (skills_dir / "README.md").write_text("# Skills")
+        result = find_orphaned_skills(str(tmp_path), [])
+        assert result == []
