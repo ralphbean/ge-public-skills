@@ -10,6 +10,8 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from scripts.sync import sync_skills, _repo_short_name
 
 
