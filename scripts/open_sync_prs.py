@@ -17,9 +17,15 @@ from scripts.sync import sync_skills, _repo_short_name
 
 def _run(cmd, **kwargs):
     """Run a shell command, returning CompletedProcess."""
-    return subprocess.run(
-        cmd, capture_output=True, text=True, check=True, **kwargs
-    )
+    result = subprocess.run(cmd, capture_output=True, text=True, **kwargs)
+    if result.returncode != 0:
+        print(f"Command failed: {cmd}", file=sys.stderr)
+        if result.stdout:
+            print(f"stdout: {result.stdout}", file=sys.stderr)
+        if result.stderr:
+            print(f"stderr: {result.stderr}", file=sys.stderr)
+        result.check_returncode()
+    return result
 
 
 def _open_pr_exists(branch_name):
