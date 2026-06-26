@@ -1,0 +1,3 @@
+[submodule "skills-registry"]
+	path = skills-registry
+	url = https://github.com/opendatahub-io/skills-registry.git

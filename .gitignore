@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 docs/superpowers/
+.cache/
+site/docs/plugins/
+site/docs/categories/
+site/docs/index.md
+site/docs/llms.txt
+site/docs/llms-full.txt
+site/mkdocs.yml
+catalog.md
