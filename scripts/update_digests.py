@@ -5,13 +5,31 @@ Usage:
 """
 
 import argparse
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
 
 import yaml
 
-from scripts.custom_linters import lint_skill_dir
+_SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def _load_sibling(module_name: str, file_name: str):
+    """Load a sibling script from the same directory."""
+    full_name = f"_local_scripts.{module_name}"
+    if full_name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(
+            full_name, _SCRIPT_DIR / file_name,
+        )
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[full_name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[full_name]
+
+
+_custom_linters = _load_sibling("custom_linters", "custom_linters.py")
+lint_skill_dir = _custom_linters.lint_skill_dir
 
 GIT_TIMEOUT = 120
 
