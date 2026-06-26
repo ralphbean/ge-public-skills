@@ -1,0 +1,6 @@
+name: ge-public-skills
+owner:
+  name: Red Hat Global Engineering
+description: Curated AI coding assistant skills for Red Hat engineering
+categories: {}
+plugins: []
