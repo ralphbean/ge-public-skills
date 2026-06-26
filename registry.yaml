@@ -7,50 +7,55 @@ categories:
     name: Evaluation & Testing
     description: Skills for evaluating and testing AI agent skills
 plugins:
-  - name: agent-eval-harness
-    description: >-
-      Generic agentic evaluation for skills and agents. Provides end-to-end
-      skills to analyze, test, score, review, and iteratively improve agent
-      skills with MLflow support for experiment tracking, tracing, and
-      reporting.
-    version: "1.9.1"
-    category: evaluation
-    scope: generic
-    tags:
-      - evaluation
-      - testing
-      - skills
-      - agents
-      - mlflow
-      - optimization
-      - scoring
-    author:
-      name: Antonin Stefanutti
-    license: Apache-2.0
-    source:
-      type: github
-      repo: opendatahub-io/agent-eval-harness
-      ref: v1.9.1
-      sha: bb7e8bd48f4638ca536a95dc6e9a68028d4d0e8d
-    homepage: https://github.com/opendatahub-io/agent-eval-harness
-    repository: https://github.com/opendatahub-io/agent-eval-harness
-    skills:
-      - name: eval-setup
-        description: One-time environment setup for evaluation (dependencies, MLflow, API keys)
-      - name: eval-analyze
-        description: Deep-read a target skill and generate eval.yaml configuration with dataset schemas and judges
-      - name: eval-dataset
-        description: Generate realistic test cases from eval.yaml schema (bootstrap, expand, from-traces)
-      - name: eval-run
-        description: Execute skill against test cases, collect artifacts, run judges, and detect regressions
-      - name: eval-review
-        description: Human-in-the-loop review of scores and outputs with qualitative feedback collection
-      - name: eval-mlflow
-        description: Bidirectional MLflow sync for results, datasets, and feedback
-      - name: eval-optimize
-        description: Automated improvement loop that identifies failures, edits SKILL.md, and re-runs with regression checks
-      - name: eval-check
-        description: Full-harness configuration health check - scans skills, commands, CLAUDE.md, and hooks for redundancy, overlap, and structural issues
-    python:
-      package: agent-eval-harness
-      requires_python: ">=3.11"
+- name: agent-eval-harness
+  description: Generic agentic evaluation for skills and agents. Provides end-to-end
+    skills to analyze, test, score, review, and iteratively improve agent skills with
+    MLflow support for experiment tracking, tracing, and reporting.
+  version: 1.9.1
+  category: evaluation
+  scope: generic
+  tags:
+  - evaluation
+  - testing
+  - skills
+  - agents
+  - mlflow
+  - optimization
+  - scoring
+  author:
+    name: Antonin Stefanutti
+  license: Apache-2.0
+  source:
+    type: github
+    repo: opendatahub-io/agent-eval-harness
+    ref: v1.9.1
+    sha: 7bc8c66706da23c93bb9555af8d7dbf62c8a0c60
+  homepage: https://github.com/opendatahub-io/agent-eval-harness
+  repository: https://github.com/opendatahub-io/agent-eval-harness
+  skills:
+  - name: eval-setup
+    description: One-time environment setup for evaluation (dependencies, MLflow,
+      API keys)
+  - name: eval-analyze
+    description: Deep-read a target skill and generate eval.yaml configuration with
+      dataset schemas and judges
+  - name: eval-dataset
+    description: Generate realistic test cases from eval.yaml schema (bootstrap, expand,
+      from-traces)
+  - name: eval-run
+    description: Execute skill against test cases, collect artifacts, run judges,
+      and detect regressions
+  - name: eval-review
+    description: Human-in-the-loop review of scores and outputs with qualitative feedback
+      collection
+  - name: eval-mlflow
+    description: Bidirectional MLflow sync for results, datasets, and feedback
+  - name: eval-optimize
+    description: Automated improvement loop that identifies failures, edits SKILL.md,
+      and re-runs with regression checks
+  - name: eval-check
+    description: Full-harness configuration health check - scans skills, commands,
+      CLAUDE.md, and hooks for redundancy, overlap, and structural issues
+  python:
+    package: agent-eval-harness
+    requires_python: '>=3.11'
