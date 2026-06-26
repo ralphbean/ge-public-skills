@@ -3,7 +3,35 @@
   "owner": {
     "name": "Red Hat Global Engineering"
   },
-  "plugins": [],
+  "plugins": [
+    {
+      "name": "agent-eval-harness",
+      "description": "Generic agentic evaluation for skills and agents. Provides end-to-end skills to analyze, test, score, review, and iteratively improve agent skills with MLflow support for experiment tracking, tracing, and reporting.",
+      "category": "evaluation",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/opendatahub-io/agent-eval-harness",
+      "repository": "https://github.com/opendatahub-io/agent-eval-harness",
+      "version": "1.9.1",
+      "author": {
+        "name": "Antonin Stefanutti"
+      },
+      "keywords": [
+        "evaluation",
+        "testing",
+        "skills",
+        "agents",
+        "mlflow",
+        "optimization",
+        "scoring"
+      ],
+      "source": {
+        "source": "github",
+        "repo": "opendatahub-io/agent-eval-harness",
+        "ref": "v1.9.1",
+        "sha": "7bc8c66706da23c93bb9555af8d7dbf62c8a0c60"
+      }
+    }
+  ],
   "metadata": {
     "description": "Curated AI coding assistant skills for Red Hat engineering"
   }
