@@ -31,7 +31,7 @@ plugins:
       type: github
       repo: opendatahub-io/agent-eval-harness
       ref: v1.9.1
-      sha: 7bc8c66706da23c93bb9555af8d7dbf62c8a0c60
+      sha: bb7e8bd48f4638ca536a95dc6e9a68028d4d0e8d
     homepage: https://github.com/opendatahub-io/agent-eval-harness
     repository: https://github.com/opendatahub-io/agent-eval-harness
     skills:
