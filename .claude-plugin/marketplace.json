@@ -7,14 +7,14 @@
     {
       "name": "agent-eval-harness",
       "description": "Generic agentic evaluation for skills and agents. Provides end-to-end skills to analyze, test, score, review, and iteratively improve agent skills with MLflow support for experiment tracking, tracing, and reporting.",
-      "category": "evaluation",
       "license": "Apache-2.0",
-      "homepage": "https://github.com/opendatahub-io/agent-eval-harness",
-      "repository": "https://github.com/opendatahub-io/agent-eval-harness",
       "version": "1.9.1",
+      "homepage": "https://github.com/opendatahub-io/agent-eval-harness",
       "author": {
         "name": "Antonin Stefanutti"
       },
+      "category": "evaluation",
+      "repository": "https://github.com/opendatahub-io/agent-eval-harness",
       "keywords": [
         "evaluation",
         "testing",
